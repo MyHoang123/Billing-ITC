@@ -1,0 +1,32 @@
+#DirectoryIndex disabled
+
+AddType text/html .shtml
+AddOutputFilter INCLUDES .shtml
+
+Options +Indexes +MultiViews 
+Options +Includes
+
+IndexOptions Charset=UTF-8
+#IndexOptions FancyIndexing
+IndexOptions SuppressHTMLPreamble
+IndexOptions HTMLTable
+IndexOptions VersionSort
+IndexOptions SuppressDescription
+IndexOptions SuppressIcon
+IndexOptions SuppressRules
+IndexOptions FoldersFirst
+IndexOptions IgnoreCase
+IndexOptions NameWidth=*
+
+IndexOrderDefault Descending Date
+
+HeaderName /application/EDI/temp/header.html
+ReadmeName /application/EDI/temp/footer.shtml
+
+IndexIgnore /application/EDI/temp
+IndexIgnore /application/EDI/favicon.ico
+
+ErrorDocument 401 ./temp/error_401.shtml
+ErrorDocument 403 ./temp/error_403.shtml
+ErrorDocument 404 ./temp/error_404.shtml
+ErrorDocument 500 ./temp/error_500.shtml

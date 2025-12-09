@@ -1,0 +1,6 @@
+{
+    "require": {
+        "sabas/edifact": "^0.5.1",
+        "php-edifact/edifact-mapping": "^0.3.2"
+    }
+}

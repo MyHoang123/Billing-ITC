@@ -1,0 +1,228 @@
+.hiden-input, .hidden-input{
+    display:none!important;
+}
+
+.card-box{
+    background-color: white!important;
+    margin-bottom: 10px;
+    padding: 14px;
+}
+
+.collapsible-box i.la.dock-right {
+    right: 10px;
+    position: absolute;
+    margin-top: 19px;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.dropdown-menu.show[x-placement="top-start"] {
+    top: 74px!important;
+}
+
+input[readonly]{
+    background-color: #fff!important;
+}
+
+.input-hidden {
+    display: none!important;
+}
+
+.m-row-selected{
+    background-color: #fff9d2 !important;
+}
+
+.m-row-selected td {
+    color: #097692;
+}
+@media (orientation:portrait) {
+    label.col-form-label {
+        display: none!important;
+    }
+}
+
+.input-required.error:not(td){
+    border: solid 1px #ff9c91 !important ;
+}
+td.input-required.error, td.error{
+    color: #ff0000 !important;
+	background-color: #fd7e7e !important;
+    /*color: #fff !important;*/
+}
+
+td.input-required.error input{
+    color: #fff !important;
+}
+
+.border-e{
+    -moz-border-radius: 4px!important;
+    -webkit-border-radius: 4px!important;
+    -ms-border-radius: 4px!important;
+    -o-border-radius: 4px!important;
+    border-radius: 4px!important;
+    border: 1px solid #eee!important;
+}
+.bg-f9{
+    background-color: #f9f9f9!important;
+}
+a.linked:hover {text-decoration: underline; cursor: pointer;}
+
+
+/*autocompletext*/
+.ui-corner-all
+{
+    -moz-border-radius: 4px 4px 4px 4px;
+}
+.ui-widget
+{
+    font-family: Verdana,Arial,sans-serif;
+    font-size: 15px;
+}
+.ui-menu
+{
+    display: block;
+    float: left;
+    list-style: none outside none;
+    margin: 0;
+    padding: 2px;
+}
+.ui-autocomplete
+{
+    cursor: default;
+    position: absolute;
+    border: solid 1px #9EBAE0;
+    margin-top: 100px;
+    background-color: #fff;
+    z-index: 99;
+}
+.ui-menu .ui-menu-item
+{
+    clear: left;
+    float: left;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+.ui-menu .ui-menu-item div
+{
+    display: block;
+    padding: 3px 3px 3px 3px;
+    text-decoration: none;
+    cursor: pointer;
+}
+.ui-menu .ui-menu-item div:hover
+{
+    display: block;
+    padding: 3px 3px 3px 3px;
+    text-decoration: none;
+    color: White;
+    cursor: pointer;
+    background-color: #9EBAE0!important;
+}
+.ui-widget-content div
+{
+    color: #222222;
+}
+/*end autocompletext*/
+
+.wrap-text {
+    white-space:normal!important;
+}
+
+.width-250{
+    width: 250px!important;
+}
+.width-300{
+    width: 300px!important;
+}
+.width-350{
+    width: 350px!important;
+}
+
+i.spinner{
+    animation: spinner-rotate 1.5s linear infinite;
+    font-size: 25px;
+}
+
+button i.spinner{
+    animation: spinner-rotate 1.5s linear infinite;
+    font-size: 18px!important;
+    margin-right: auto 0;
+    margin-right: .5rem;
+}
+
+@-webkit-keyframes spinner-rotate {
+    0%{transform: rotate(0deg);}
+    100%{transform: rotate(360deg);}
+}
+
+/* Standard syntax */
+@keyframes spinner-rotate {
+    0%{transform: rotate(0deg);}
+    100%{transform: rotate(360deg);}
+}
+
+.button-bar-group{
+    float: right;
+}
+
+.btn-default {
+    color: #333;
+    background-color: #fcfcfc;
+    border-color: #ddd;
+}
+
+.btn-group-xs>.btn, .btn-xs {
+    padding: 5px 17px;
+    font-size: 12px;
+    line-height: 1.6666667;
+    border-radius: 2px;
+}
+
+.ibox-head{
+    min-height: 50px!important;
+}
+
+/*add new by haro 14/12/2018*/
+.dropdown-toggle:after {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: .3em;
+    vertical-align: middle;
+    content: "";
+    border-top: .3em solid;
+    border-right: .3em solid transparent;
+    border-left: .3em solid transparent;
+}
+
+.show-table.dropdown-toggle:after {
+    margin-left: 0!important;
+}
+
+.lower-text{
+    text-transform: lowercase!important;
+}
+
+/*add new by haro 20/12/2018*/
+.modal-content{
+    border-radius: 3px!important;
+}
+
+/*add new 02/01/2019*/
+.page-content{
+    margin-top: 20px!important;
+}
+
+.my-box{
+    -moz-box-shadow: 1px 1px 0px #ccc;
+    -webkit-box-shadow: 1px 1px 0px #ccc;
+    box-shadow: 1px 1px 0px #ccc;
+    -moz-border-radius: 4px!important;
+    -webkit-border-radius: 4px!important;
+    -ms-border-radius: 4px!important;
+    -o-border-radius: 4px!important;
+    border-radius: 4px!important;
+    border: 1px solid #eee!important;
+    background-color: #fff!important;
+}

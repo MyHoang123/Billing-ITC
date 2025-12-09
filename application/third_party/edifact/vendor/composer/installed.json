@@ -1,0 +1,54 @@
+[
+    {
+        "name": "metroplex-systems/edifact",
+        "version": "1.1.0",
+        "version_normalized": "1.1.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/metroplex-systems/edifact.git",
+            "reference": "04edc31627b416088ab2a1a67a437c16ead74c37"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/metroplex-systems/edifact/zipball/04edc31627b416088ab2a1a67a437c16ead74c37",
+            "reference": "04edc31627b416088ab2a1a67a437c16ead74c37",
+            "shasum": ""
+        },
+        "require": {
+            "php": "^5.6|^7.0"
+        },
+        "require-dev": {
+            "duncan3dc/object-intruder": "^0.3.0",
+            "mockery/mockery": "^1.0",
+            "phpunit/phpunit": "^5.7.11"
+        },
+        "time": "2018-06-25T22:04:45+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Metroplex\\Edifact\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "Apache-2.0"
+        ],
+        "authors": [
+            {
+                "name": "Craig Duncan",
+                "role": "Developer",
+                "email": "git@duncanc.co.uk",
+                "homepage": "https://github.com/metroplex-systems"
+            }
+        ],
+        "description": "Parser and Serializer for UN/EDIFACT messages",
+        "homepage": "https://github.com/metroplex-systems/editfact",
+        "keywords": [
+            "edi",
+            "edifact",
+            "parser",
+            "serializer"
+        ]
+    }
+]

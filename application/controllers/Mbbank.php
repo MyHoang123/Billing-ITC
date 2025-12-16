@@ -101,7 +101,7 @@ class Mbbank extends CI_Controller
             ];
             
             $result = $this->CallApiCreateQrMb($data,$headerRequest);
-            if($result) {
+            if($result && $result['qr_info']) {
                   // Prepare transaction data for database
                   $expired_time = null;
                     if (!empty($result['expire_time'])) {
@@ -255,7 +255,7 @@ class Mbbank extends CI_Controller
                $this->mbbank->saveAPIResponse($logData);
                 $dataUpdate = [
                     'transaction_ref_number' => $result['transaction_number'],
-                    'ft_code' => $result['ft_code']
+                    'pg_issuer_txn_reference' => $result['ft_code']
                 ];
                 //Xem thêm dữ liệu update
                 $this->mbbank->updateStatus($data['order_reference'], 'PAID', $dataUpdate);

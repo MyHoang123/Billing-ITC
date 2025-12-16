@@ -85,8 +85,8 @@ class Report extends CI_Controller {
         $this->load->view('header', $this->data);
         $this->load->view('report/revenue', $this->data);
         $this->load->view('footer');
-    }
-
+        }
+        
     public function rptReleasedInv(){
         $access = $this->user->access('rptReleasedInv');
         if($access === false) {

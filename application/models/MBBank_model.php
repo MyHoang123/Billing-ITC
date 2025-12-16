@@ -146,8 +146,8 @@ class MBBank_model extends CI_Model
             if (isset($additionalData['paid_amount'])) {
                 $updateData['transaction_number'] = $additionalData['transaction_number'];
             }
-            if (isset($additionalData['ft_code'])) {
-                $updateData['ft_code'] = $additionalData['ft_code'];
+            if (isset($additionalData['pg_issuer_txn_reference'])) {
+                $updateData['pg_issuer_txn_reference'] = $additionalData['pg_issuer_txn_reference'];
             }
             $this->ceh->where('transaction_ref_id', $transactionRefId);
             $this->ceh->update('mbbank_payments', $updateData);

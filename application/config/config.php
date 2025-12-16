@@ -26,7 +26,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 //$config['base_url'] = 'http://127.0.0.1/ebilling/';
 $protocol = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
 $base_url = $_SERVER['HTTP_HOST'];
-$config['base_url'] = $protocol . 's://'. $base_url;
+$config['base_url'] = $protocol . '://'. $base_url;
 /*
 |--------------------------------------------------------------------------
 | Index File

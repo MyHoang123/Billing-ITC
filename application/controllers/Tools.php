@@ -298,7 +298,7 @@ class Tools extends CI_Controller {
                 }
                 $outInfo = [];
                 $mailTo = null;
-                $args['DraftNo'] = $InvDraftNo; 
+                $args['DraftNo'] = $args['draft_total']['DRAFT_INV_NO']; 
                 if(empty($args['draft_total'])) {
                     $this->data['error'] = "Không tìm thấy hóa đơn tay!";
                     echo json_encode($this->data);

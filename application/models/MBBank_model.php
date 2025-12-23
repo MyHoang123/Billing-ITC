@@ -125,7 +125,7 @@ class MBBank_model extends CI_Model
     /**
      * Update transaction status
      */
-    public function updateStatus($transactionRefId, $status, $additionalData = array())
+    public function updateStatus($transactionRefId, $transId, $status, $additionalData = array())
     {
         try {
             $updateData = array(
@@ -150,6 +150,7 @@ class MBBank_model extends CI_Model
                 $updateData['pg_issuer_txn_reference'] = $additionalData['pg_issuer_txn_reference'];
             }
             $this->ceh->where('transaction_ref_id', $transactionRefId);
+            $this->ceh->where('transaction_ref_number', $transId);
             $this->ceh->update('mbbank_payments', $updateData);
             
             if ($this->ceh->affected_rows() > 0) {
@@ -530,7 +531,7 @@ class MBBank_model extends CI_Model
         public function getInvFromDraft($Eir){
             $this->ceh->select("INV_NO AS InvNo"); 
             $this->ceh->from("INV_DFT");
-            $this->ceh->where("DRAFT_INV_NO =", $Eir);
+            $this->ceh->where("REPLACE(DRAFT_INV_NO, '/', '') =", $Eir);
             $this->ceh->where("INV_NO IS NOT NULL");
             return $this->ceh->get()->result_array();
         }
@@ -604,5 +605,150 @@ class MBBank_model extends CI_Model
             );
         }
     }
+        public function updateRefund($transactionNumber, $refundAmount, $DraftId = array())
+        {
+            $this->ceh->trans_begin();
+            try {
+                $refundAmount = (float) $refundAmount;
+
+                // 1. Update mbbank_payments
+                $this->ceh->set(
+                    'refund_amount',
+                    "COALESCE(refund_amount, 0) + {$refundAmount}",
+                    false
+                );
+                $this->ceh->set('updated_at', date('Y-m-d H:i:s'));
+                $this->ceh->where('transaction_ref_number', $transactionNumber);
+                $this->ceh->update('mbbank_payments');
+
+                if ($this->ceh->affected_rows() <= 0) {
+                    throw new Exception('Update mbbank_payments failed');
+                }
+
+                $UserId = $this->session->userdata("UserID");
+
+            foreach ($DraftId as $item) {
+                    
+                $row = $this->ceh
+                        ->where('rowguid', $item['rowid'])
+                        ->get('INV_DFT_DTL')
+                        ->row_array();
+                if (!$row) {
+                    continue;
+                }   
+                    $refundQty = (float)$item['PICK'];
+                    
+                    if ($refundQty <= 0 || $refundQty > $row['QTY']) {
+                        throw new Exception('Invalid refund qty: ' . $item['rowid']);
+                    }
+                    $ratio = $refundQty / (float)$row['QTY'];
+
+                    $ContentUpdate = 'REFUND BY ' . $UserId .
+                                    ' AT ' . date('Y-m-d H:i:s') .
+                                    ' QTY: ' . $item['SL'];
+
+                    $updateData = [
+                            'QTY'      => $row['QTY'] - $refundQty,
+                            'AMOUNT'  => round($row['AMOUNT']  * (1 - $ratio), 2),
+                            'DIS_AMT'  => round($row['DIS_AMT']  * (1 - $ratio), 2),
+                            'VAT'     => round($row['VAT']     * (1 - $ratio), 2),
+                            'TAMOUNT' => round($row['TAMOUNT'] * (1 - $ratio), 2),
+                            'NOTE'    => $ContentUpdate,
+                    ];
+
+                    $this->ceh->where('rowguid', $item['rowid']);
+                    $this->ceh->update('INV_DFT_DTL', $updateData);
+                    if ($this->ceh->affected_rows() <= 0) {
+                        log_message('error', 'Last Query: ' . $this->ceh->last_query());
+                        throw new Exception('Update INV_DFT_DTL failed for rowguid: ' . $item['rowid']);
+                    }
+            }
+                $this->ceh->trans_commit();
+                return true;
+
+            } catch (Exception $e) {
+                $this->ceh->trans_rollback();
+                log_message('error', 'MBBank_model::updateRefund Error: ' . $e->getMessage());
+                return false;
+            }
+        }
+        // Statistic
+        public function getStatisticMbbank() {
+            $Data = array();
+            $yesterday = '2025-12-18';
+            // $yesterday = date('Y-m-d', strtotime('-1 day'));
+            $currentYear = date('Y');
+            $revenueByMonth = array_fill(0, 12, 0);
+            // Chọn tổng số order đã thanh toán của ngày hôm trước
+            $OrderPaid = $this->ceh
+                ->select('COUNT(*) as total')
+                ->from('mbbank_payments')
+                ->where('status', 'PAID')
+                ->where('CAST(created_at AS DATE) =', $yesterday)
+                ->get()
+                ->row_array(); // Lấy 1 dòng
+
+            $Data['DataDay']['OrderPaidYesterday'] = $OrderPaid['total'] ?? 0;
+            $Refunded = $this->ceh
+                ->select('COUNT(*) as total')
+                ->from('mbbank_payments')
+                ->where('refund_amount >', 0)
+                ->where("CAST(created_at AS DATE) =", $yesterday)
+                ->get()
+                ->row_array();
+
+            $Data['DataDay']['RefundedYesterday'] = $Refunded['total'] ?? 0;
+
+            $Totals = $this->ceh
+                ->select('SUM(amount) as total_amount, SUM(refund_amount) as total_refund')
+                ->from('mbbank_payments')
+                ->where("CAST(created_at AS DATE) =", $yesterday)
+                ->get()
+                ->row_array();
+
+            $Data['DataDay']['TotalAmountYesterday'] = $Totals['total_amount'] ?? 0;
+            $Data['DataDay']['TotalRefundYesterday'] = $Totals['total_refund'] ?? 0;
+
+             // Lấy tổng doanh thu từ 01/01 đến hôm nay
+            $Revenue = $this->ceh
+                            ->select("MONTH(created_at) as month, SUM(amount) as total_amount", false)
+                            ->from('mbbank_payments')
+                            ->where('status', 'PAID')
+                            ->where("YEAR(created_at) =", $currentYear)
+                            ->group_by("MONTH(created_at)")
+                            ->order_by("MONTH(created_at)")
+                            ->get()
+                            ->result_array();
+            foreach ($Revenue as $row) {
+                    $monthIndex = intval($row['month']) - 1; 
+                    $revenueByMonth[$monthIndex] = floatval($row['total_amount']);
+                }
+            $Data['RevenueYTD'] = $revenueByMonth;
+            $Cancel = $this->ceh
+                        ->select('COUNT(*) as total')
+                        ->from('mbbank_payments')
+                        ->where('status !=', 'PAID')
+                        ->where('CAST(created_at AS DATE) =', $yesterday)
+                        ->get()
+                        ->row_array();
+            $Data['DataDay']['Cancel'] = $Cancel['total'] ?? 0;
+            $Record = $this->ceh
+                        ->select('id, transaction_ref_id, booking_no, amount, refund_amount, pg_issuer_txn_reference, pg_paytime, pg_order_info, pg_card_number, pg_card_holder_name, status ')
+                        ->from('mbbank_payments')
+                        ->where('CAST(created_at AS DATE) =', $yesterday)
+                        ->get()
+                        ->result_array();
+            $Data['Record'] = $Record;
+            return $Data;
+        }
+        public function getHistoryPayment($id)
+        {
+            return $this->ceh
+                ->select('api_endpoint, created_at')
+                ->from('mbbank_api_logs')
+                ->where('transaction_ref_id', $id)
+                ->get()
+                ->result_array();
+        }
 
 }

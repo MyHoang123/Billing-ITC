@@ -53,7 +53,7 @@ $route['default_controller'] = 'home';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 // Add this route for tariff creation API
-$route['mbbank/ipn'] = "MbbankPublish/MbbankIPN";                    //IPN
+$route['mbbank/ipn'] = "MbbankPublish/MbbankIPN";                    //IPN PUBLISH
 
 $route['106a6c241b8797f52e1e77317b96a201'] = "home";
 $route['106a6c241b8797f52e1e77317b96a201/([a-zA-Z0-9]+)'] = "home/$1";
@@ -94,10 +94,12 @@ $route['33952728babf3c592dbcfe62883f4662/([a-zA-Z0-9]+)'] = "Edimg/$1";
 $route['72664dc0959f3b0c04891f8c7046a9f3'] = "Api";
 $route['72664dc0959f3b0c04891f8c7046a9f3/([a-zA-Z0-9]+)'] = "Api/$1";
 
-// $route['mbbank/ipn'] = md5('Mbbank') . '/' . md5('MbbankIPN');
-
 $route['d171035a85cc2258e37d64e18505d78c'] = "Mbbank";
 $route['d171035a85cc2258e37d64e18505d78c/([a-zA-Z0-9]+)'] = "Mbbank/$1";
+
+$route['defc9d3abbeba4eef5865829848a6a39'] = "MnPayment";
+$route['defc9d3abbeba4eef5865829848a6a39/([a-zA-Z0-9]+)'] = "MnPayment/$1";
+
 
 
 

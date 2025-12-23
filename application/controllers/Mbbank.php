@@ -71,7 +71,7 @@ class Mbbank extends CI_Controller
                 ];
             }
             $secretKey = $this->config->item('mbbank_secret_key');
-            $data['order_reference'] = $this->generateShortOrderReference();
+            $data['order_reference'] = 'ICQR' . $this->generateShortOrderReference();
             $data['access_code'] = $this->config->item('mbbank_access_code');
             $data['merchant_id'] = $this->config->item('mbbank_merchant_id');
             $data['currency'] = $this->config->item('mbbank_currency');
@@ -196,7 +196,6 @@ class Mbbank extends CI_Controller
                         "HTTP Error: $httpCode | cURL Error: $curlError | Response: $response"
                     );
             }
-
             $logData = [
                 'transaction_ref_id' => $data['order_reference'] ?? '',
                 'api_endpoint' => 'pg-paygate-create-order',
@@ -249,8 +248,9 @@ class Mbbank extends CI_Controller
                     'api_endpoint' => 'pg-paygate-check-status',
                     'request_data' => $data,
                     'response_data' => $result ?? null,
-                    'http_code' => '200',
-                    'status' => 'success',
+                    'http_code' => $httpCode,
+                    'status' => $curlError ? 'error' : ($httpCode === 200 ? 'success' : 'failed'),
+                    'error_message' => $curlError ?: ''
                 ];
                $this->mbbank->saveAPIResponse($logData);
                 $dataUpdate = [
@@ -258,7 +258,7 @@ class Mbbank extends CI_Controller
                     'pg_issuer_txn_reference' => $result['ft_code']
                 ];
                 //Xem thêm dữ liệu update
-                $this->mbbank->updateStatus($data['order_reference'], 'PAID', $dataUpdate);
+                $this->mbbank->updateStatus($data['order_reference'], $result['transaction_number'], 'PAID', $dataUpdate);
                 echo json_encode(['Status' => 'PAID']);
                 exit;
             }
@@ -338,7 +338,7 @@ class Mbbank extends CI_Controller
     {
         $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         $result = '';
-        for ($i = 0; $i < 13; $i++) {
+        for ($i = 0; $i < 15; $i++) {
             $result .= $characters[rand(0, strlen($characters) - 1)];
         }
         return $result;
@@ -428,12 +428,10 @@ class Mbbank extends CI_Controller
                         "HTTP Error: $httpCode | cURL Error: $curlError | Response: $response"
                     );
             }
-
             $responseData = json_decode($response, true);
             if (!$responseData || !isset($responseData['access_token'])) {
                 throw new Exception('Invalid token response');
             }
-
             return [
                 'success' => true,
                 'access_token' => $responseData['access_token'],
@@ -443,8 +441,91 @@ class Mbbank extends CI_Controller
             log_message('error', 'MbbankGetToken Error: ' . $e->getMessage());
             return [
                 'success' => false,
-                'error' => $e->getMessage()
+
             ];
         }
+    }
+    private function CallApiRefundMb($accessToken, $formData) {
+        try {
+            $clientMessageId = $this->generateUUID();
+            $transactionId = $this->generateUUID();
+            $url = $this->config->item('mbbank_refund_url'); 
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true); // bật POST
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($formData)); // gửi JSON body
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    'Content-Type: application/json',
+                    'Accept: application/json',
+                    'Authorization: Bearer ' . $accessToken,
+                    'clientMessageId: ' . $clientMessageId,
+                    'transactionId: ' . $transactionId
+            ]);
+            $response = curl_exec($ch);
+            $curlError = curl_error($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+             if ($curlError) {
+                 throw new Exception(
+                        "CURL Error: $curlError | HTTP Code: $httpCode | Response: $response"
+                    );
+            }
+            if ($httpCode !== 200) {
+                throw new Exception(
+                        "HTTP Error: $httpCode | cURL Error: $curlError | Response: $response"
+                    );
+            }
+            $data = json_decode($response, true);
+            $logData = [
+                'transaction_ref_id' => $formData['transaction_reference_id'] ?? '',
+                'api_endpoint' => 'pg-paygate-refund',
+                'request_data' => $formData,
+                'response_data' => $data ?? null,
+                'http_code' => $httpCode,
+                'status' => $curlError ? 'error' : ($httpCode === 200 ? 'success' : 'failed'),
+                'error_message' => $curlError ?: ''
+            ];
+              $this->mbbank->saveAPIResponse($logData);
+              return $data;
+            } catch (Exception $e) {
+                return false;
+                log_message('error', 'Refund Error: ' . $e->getMessage());
+            }
+    }
+     public function requireRefund()
+    {
+            header('Content-Type: application/json');
+            $data = json_decode(file_get_contents('php://input'), true);
+            $DraftId = $data['DraftId'] ?? null;
+            unset($data['DraftId']);
+            $secretKey = $this->config->item('mbbank_secret_key');
+            $data['merchant_id'] =  $this->config->item('mbbank_merchant_id');
+            $data['access_code'] = $this->config->item('mbbank_access_code');
+            $queryString = $this->generateMac($data);
+            $data['mac'] = strtoupper(md5($secretKey . $queryString));
+            $data['mac_type'] = $this->config->item('mbbank_mac_type');
+            if (!$data) {
+                return [
+                    'success' => false,
+                    'error' => 'Dữ liệu không hợp lệ!'
+                ];
+            }
+            $tokenResult = $this->getAccessTokenFromMBBank();
+            $UpdateApi = $this->CallApiRefundMb($tokenResult['access_token'], $data);
+            if($UpdateApi) {
+                $result = $this->mbbank->updateRefund($UpdateApi['refund_reference_id'], $UpdateApi['refund_amount'], $DraftId);
+                if($result) {
+                    echo json_encode(['Status' => true, 'Message' => 'Thành công']);
+                    exit;
+                }
+                else {
+                    echo json_encode(['Status' => false, 'Message' => 'Lỗi máy chủ']);
+                    exit;
+                }
+            }
+            else {
+                echo json_encode(['Status' => false, 'Message' => 'Lỗi đường truyền']);
+                    exit;
+            }
     }
 }

@@ -26,13 +26,13 @@ $config['mbbank_base_url'] = 'https://api-sandbox.mbbank.com.vn';
 
 $config['mbbank_query_v1_url'] = 'https://api-sandbox.mbbank.com.vn/private/ms/pg-paygate-authen/paygate/detail';
 $config['mbbank_list_transactions_url'] = 'https://api-sandbox.mbbank.com.vn/private/ms/pg-paygate/v1/paygate/list-transactions';
-$config['mbbank_refund_url'] = 'https://api-sandbox.mbbank.com.vn/private/ms/pg-paygate-authen/paygate/refund/single';
 
 //MT
 $config['mbbank_ipn_url'] = 'https://api-sandbox.mbbank.com.vn/integration-paygate-cangitc/v1.0/payIpn';
 $config['mbbank_token_url'] = 'https://api-sandbox.mbbank.com.vn/oauth2/v1/token';
 $config['mbbank_create_order_url'] = 'https://api-sandbox.mbbank.com.vn/private/ms/pg-paygate-authen/paygate/v2/create-order';
 $config['mbbank_query_url'] = 'https://api-sandbox.mbbank.com.vn/private/ms/pg-paygate-authen/v2/paygate/detail';
+$config['mbbank_refund_url'] = 'https://api-sandbox.mbbank.com.vn/private/ms/pg-paygate-authen/paygate/refund/single';
 
 
 
